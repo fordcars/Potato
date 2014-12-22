@@ -230,14 +230,14 @@ function definitions() // Has access to other functions, since this is after fun
 	c.lineEndings = "\n"; // All line endings in levels are set to this
 	
 	c.gamejoltUrl = "http://gamejolt.com"
-	c.gamejoltId = 38906;
-	c.gamejoltPrivateKey = "3af03e6a834a552e1c0375743507d736"; // Insecure to put this here?
+	c.gamejoltId = 0;
+	c.gamejoltPrivateKey = "0";
 	
 	// Gamejolt trophies
-	c.tNormalPotato = 13019;
-	c.tChristmasPotato = 13120;
-	c.tWetPotato = 13118;
-	c.tSpacePotato = 13145;
+	c.tNormalPotato = 0;
+	c.tChristmasPotato = 0;
+	c.tWetPotato = 0;
+	c.tSpacePotato = 0;
 }
 
 function main()
