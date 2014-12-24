@@ -89,6 +89,22 @@ function drawBackgroundObjects(layer)
 	}
 }
 
+function drawForegroundObjects(layer)
+{
+	var currentForegroundObject;
+	
+	for(var i=0, length=ga.foregroundObjects.length; i<length; i++)
+	{
+		currentForegroundObject = ga.foregroundObjects[i];
+		currentForegroundObject.y += currentForegroundObject.speed + ga.scrollingSpeed;
+		
+		if(spriteIsVisible(currentForegroundObject))
+		{
+			layer.drawImage(currentForegroundObject.animation.getFrame(), currentForegroundObject.x, currentForegroundObject.y);
+		}
+	}
+}
+
 function drawFloorTiles(layer)
 {
 	var currentFloorTile;

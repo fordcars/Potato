@@ -287,5 +287,8 @@ function exitFullScreen() // Based on http://davidwalsh.name/fullscreen
 	} else if(document.webkitExitFullscreen)
 	{
 		document.webkitExitFullscreen();
+	} else if(document.msExitFullscreen)
+	{
+		document.msExitFullscreen();
 	}
 }

@@ -26,7 +26,7 @@ function addEventListeners() // Only called once
 
 function mouseMoveEventHandler(event)
 {
-	var e = e || window.event;
+	var e = event || window.event;
 	var currentTime = Date.now();
 	
 	if(currentTime>(inp.lastMouseMoveTime + c.mouseMoveThrottle))
@@ -64,7 +64,7 @@ function clickEventHandler(event)
 
 function keyDownEventHandler(event)
 {
-	var e = e || window.event;
+	var e = event || window.event;
 	var keyCode = e.keyCode || e.key;
 	
 	for(var i=0; i<c.numberOfInputKeys; i++)
@@ -81,7 +81,7 @@ function keyDownEventHandler(event)
 
 function keyUpEventHandler(event)
 {
-	var e = e || window.event;
+	var e = event || window.event;
 	var keyCode = e.keyCode || e.key;
 	
 	for(var i=0; i<c.numberOfInputKeys; i++)

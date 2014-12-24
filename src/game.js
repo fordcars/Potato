@@ -37,7 +37,7 @@ function setupGame()
 	ga.potatoSpeed = ga.defaultPotatoSpeed;
 	ga.scrollingSpeed = ga.defaultScrollingSpeed;
 	ga.currentScrollingY = ga.defaultScrollingY;
-	ga.score = 0;
+	ga.currentLevelScore = 0;
 	
 	l.currentLevel = loadNextPotatoLevel();
 	
@@ -45,7 +45,8 @@ function setupGame()
 	
 	drawBasicBackground(bg);
 	
-	ga.backgroundObjects = createBackgroundObjects();
+	ga.backgroundObjects = createLevelObjects(true); // True for background
+	ga.foregroundObjects = createLevelObjects(false);
 	ga.floorTiles = createNewFloorTiles(getAnimationFromName(l.currentLevel.floorTileStyle), l.currentLevel.amountOfLines);
 	
 	potatoX = ga.floorTiles[1].x + (ga.floorTileSide / 2);
@@ -53,6 +54,13 @@ function setupGame()
 	ga.potato = createSprite(getAnimationFromName("potato"), potatoX, c.hCanHeight); // Create potato
 	
 	ga.uiLocation = "game";
+}
+
+function resetGame()
+{
+	ga.score = 0;
+	
+	changeMenuLocation("main");
 }
 
 // Game elements
@@ -72,9 +80,11 @@ function createSprite(animationSprite, x, y) // An animation sprite is the raw a
 	return sprite;
 }
 
-function createBackgroundObjects()
+function createLevelObjects(isInBackground)
 {
-	var backgroundObjects = [];
+	var objectArray = [];
+	
+	var objects = [];
 	var currentBackgroundObject;
 	var currentBackgroundObjectAnimation;
 	
@@ -85,9 +95,17 @@ function createBackgroundObjects()
 	var spriteWidth;
 	var spriteHeight;
 	
-	for(var i=0, length=l.currentLevel.backgroundObjects.length; i<length; i++)
+	if(isInBackground)
 	{
-		currentBackgroundObject = l.currentLevel.backgroundObjects[i];
+		objectArray = l.currentLevel.backgroundObjects;
+	} else
+	{
+		objectArray = l.currentLevel.foregroundObjects;
+	}
+	
+	for(var i=0, length=objectArray.length; i<length; i++)
+	{
+		currentBackgroundObject = objectArray[i];
 		currentBackgroundObjectAnimation = getAnimationFromName(currentBackgroundObject.style);
 		
 		if(currentBackgroundObjectAnimation==false)
@@ -105,13 +123,23 @@ function createBackgroundObjects()
 			
 			currentSprite.x = randomInt(-1, c.canWidth - spriteWidth);
 			currentSprite.y = randomInt(-l.currentLevel.length, 0); // Spawns somewhere in the level
-			currentSprite.speed = currentBackgroundObject.speed;
+			currentSprite.speed = getRandomSpeed(currentBackgroundObject.speed);
 			
-			backgroundObjects.push(currentSprite);
+			objects.push(currentSprite);
 		}
 	}
 	
-	return backgroundObjects;
+	return objects;
+}
+
+function getRandomSpeed(targetSpeed) // Gets a speed similar to targetSpeed, but random (c.randomSpeedOffset). Not random when the targetSpeed is 0.
+{
+	if(targetSpeed==0)
+	{
+		return targetSpeed;
+	}
+	
+	return randomFloat(targetSpeed - c.randomSpeedOffset, targetSpeed + c.randomSpeedOffset);
 }
 			
 function createNewFloorTiles(animation, numberOfTileLines)
@@ -189,33 +217,34 @@ function gameOver()
 {
 	ga.firstFrame = true;
 	l.currentLevelIndex--;
-	changeMenuLocation("gameOver");
+	
+	addScore(ga.score + ga.currentLevelScore); // Uploads 'fake' score, the score you would of had
+	changeMenuLocation("gameOver"); // Shows 'fake' score
 }
 
 function gameWon()
 {
-	var realCurrentLevelIndex = l.currentLevelIndex - 1; // The make it more logical at this stage
-	
-	ga.firstFrame = true;
 	l.currentLevelIndex = 0;
-	changeMenuLocation("gameWon");
 	
-	getTrophy(realCurrentLevelIndex);
+	changeMenuLocation("gameWon");
 }
 
 function levelFinished()
 {
-	if(l.currentLevel.lastLevel)
+	var realCurrentLevelIndex = l.currentLevelIndex - 1; // The make it more logical at this stage
+	getTrophy(realCurrentLevelIndex);
+	
+	ga.score += ga.currentLevelScore; // Add to total score
+	addScore(ga.score); // Upload real score
+	
+	ga.firstFrame = true; // Tells the game to setup next time, to get the next level
+	
+	if(l.currentLevel.isLastLevel)
 	{
 		gameWon();
 	} else
 	{
-		var realCurrentLevelIndex = l.currentLevelIndex - 1; // The make it more logical at this stage
-		
-		ga.firstFrame = true;
 		changeMenuLocation("levelFinished");
-		
-		getTrophy(realCurrentLevelIndex);
 	}
 }
 
@@ -279,7 +308,7 @@ function doMath()
 	
 	ga.potato.animation.delay -= ga.potatoAnimationAugmentation;
 	
-	ga.score++;
+	ga.currentLevelScore++;
 }
 
 function mainGameLoop()
@@ -293,6 +322,6 @@ function mainGameLoop()
 	
 	drawBackgroundObjects(fg); // Also does movement for optimization
 	drawFloorTiles(fg); // Also does potato collision detection for optimization
-	
 	drawPotato(fg);
+	drawForegroundObjects(fg); // Also does movement for optimization
 }

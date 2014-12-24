@@ -36,7 +36,7 @@ function createMenuButtons()
 	addMenuButton("Restart level", 350, m.gameOverButtons, "normal", {defaultValue: "play"});
 	addMenuButton("Return to main menu", 400, m.gameOverButtons, "normal", {defaultValue: "main"});
 	
-	addMenuButton("Return to main menu", 350, m.gameWonButtons, "normal", {defaultValue: "main"});
+	addMenuButton("Return to main menu", 350, m.gameWonButtons, "callback", {defaultValue: resetGame});
 	
 	addMenuButton("Next level", 350, m.levelFinishedButtons, "normal", {defaultValue: "play"});
 	addMenuButton("Return to main menu", 400, m.levelFinishedButtons, "normal", {defaultValue: "main"});
@@ -308,6 +308,8 @@ function displayConfirmFullScreen(layer)
 
 function displayGameOver(layer)
 {
+	var score = ga.score + ga.currentLevelScore; // Fake score, what the player would of gotten
+	
 	layer.clearLayer();
 	
 	layer.fillStyle = c.mainMenuBackgroundColor;
@@ -315,7 +317,7 @@ function displayGameOver(layer)
 	
 	layer.fillStyle = c.mainMenuColor;
 	layer.drawCenteredString("GAME OVER", c.hCanWidth, 200);
-	layer.drawCenteredString("SCORE: " + ga.score, c.hCanWidth, 250);
+	layer.drawCenteredString("SCORE: " + score, c.hCanWidth, 250);
 	
 	handleMenuButtons(layer, m.gameOverButtons);
 }
@@ -343,17 +345,17 @@ function displayLevelFinished(layer)
 	
 	layer.fillStyle = c.mainMenuColor;
 	layer.drawCenteredString("LEVEL FINISHED!", c.hCanWidth, 200);
-	layer.drawCenteredString("SCORE: " + ga.score, c.hCanWidth, 250);
+	layer.drawCenteredString("SCORE: " + ga.score, c.hCanWidth, 250); // Now real score
 	
 	handleMenuButtons(layer, m.levelFinishedButtons);
 }
 
 function saveOptions() // Why does the screen flash when this runs?
 {
-	o.displayMode = m.optionsButtons[0].value;
+	o.displayMode = m.optionsButtons[0].value; // UGLY
 	o.music = m.optionsButtons[1].value;
 	
-	r.resourceArray[1].data.muted = !o.music;
+	getResourceFromName("potatoMusic").data.muted = !o.music;
 	
 	if(o.displayMode!="Normal")
 	{

@@ -56,10 +56,11 @@ function loadNextPotatoLevel() // Levels defined here
 	level.amountOfLines = 100;
 	level.backgroundColor = "white";
 	level.backgroundImage = 0;
-	level.floorTileStyle = getAnimationFromName("grass");
+	level.floorTileStyle = "grass";
 	
 	level.backgroundObjects = [];
-	level.lastLevel = false;
+	level.foregroundObjects = [];
+	level.isLastLevel = false;
 	
 	switch(l.currentLevelIndex)
 	{
@@ -68,10 +69,14 @@ function loadNextPotatoLevel() // Levels defined here
 			level.backgroundColor = "rgb(100, 100, 255)";
 			level.floorTileStyle = "grass";
 			
-			level.backgroundObjects = [{style: "cloud01", amount: 100, speed: -2},
-									   {style: "cloud02", amount: 100, speed: -2},
-									   {style: "cloud03", amount: 100, speed: -2},
+			level.backgroundObjects = [{style: "transparentCloud01", amount: 100, speed: -2}, // Somehow the speed defines how 3d it looks like. The lower the number, the deeper the cloud.
+									   {style: "transparentCloud02", amount: 100, speed: -2},
+									   {style: "transparentCloud03", amount: 100, speed: -2},
 									   {style: "jet", amount: 10, speed: -4}]; // Speed 0 means it goes at the same speed as the level scrolling
+									   
+			level.foregroundObjects = [{style: "transparentCloud01", amount: 50, speed: 1},
+									   {style: "transparentCloud02", amount: 50, speed: 1},
+									   {style: "transparentCloud03", amount: 50, speed: 1}];
 			break;
 		
 		case 1: // Floor tiles only start animating when they show up on screen
@@ -90,7 +95,10 @@ function loadNextPotatoLevel() // Levels defined here
 			level.floorTileStyle = "underwater";
 			
 			level.backgroundObjects = [{style: "bubble", amount: 100, speed: 2},
+									   {style: "fish", amount: 100, speed: -4},
 									   {style: "potato", amount: 10, speed: 4}];
+									   
+			level.foregroundObjects = [{style: "bubble", amount: 50, speed: 2}];
 			break;
 			
 		case 3:
@@ -100,8 +108,7 @@ function loadNextPotatoLevel() // Levels defined here
 			level.floorTileStyle = "space";
 			
 			level.backgroundObjects = [{style: "rocket", amount: 50, speed: -8}];
-			
-			level.lastLevel = true;
+			level.isLastLevel = true;
 			break;
 		
 		default:
