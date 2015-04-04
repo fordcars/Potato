@@ -18,19 +18,22 @@
 
 // Level objects highly not-optimized! Fairly ugly code, sorry :(
 
-// TODO: Make it work in IE? Not important
+// TODO: Make it work in IE on Gamejolt?
 
 window.onload = main;
 
 // All evil globals defined here. Don't look!
-var fg; // Layer 1 (The top layer)
-var bg; // Layer 2
+var ui; // Layer 1 (The top layer)
+var fg; // Layer 2
+var bg; // Layer 3
 
 var canvasContainer;
 var canvases = [];
 var canvasContexts = [];
 var mainCanvas;
 var mainCanvasContext;
+
+var socketIo = io("http://potato.biz.tm:3000");
 
 // "Namespaces"
 var gr = {}; // Graphics. Game and graphics both start with g
@@ -149,6 +152,7 @@ function definitions() // Has access to other functions, since this is after fun
 	inp.down = newInputKey(40);
 	inp.left = newInputKey(37);
 	inp.right = newInputKey(39);
+	inp.enter = newInputKey(13, true, chat);
 
 	// Menu
 	m.mainMenuButtons = [];
@@ -158,6 +162,8 @@ function definitions() // Has access to other functions, since this is after fun
 	m.gameOverButtons = [];
 	m.gameWonButtons = [];
 	m.levelFinishedButtons = [];
+	m.gameSelectionButtons = []; // Singleplayer/Multiplayer
+	m.respawnButtons = [];
 	
 	m.location = "loading";
 	m.oldLocation = "";
@@ -191,7 +197,7 @@ function definitions() // Has access to other functions, since this is after fun
 	
 	ga.numberOfSlots = 4;
 	
-	ga.defaultScrollingSpeed = 3;
+	ga.defaultScrollingSpeed = ga.defaultPotatoSpeed;
 	ga.scrollingSpeed;
 	
 	ga.defaultScrollingY = 200;
@@ -206,6 +212,17 @@ function definitions() // Has access to other functions, since this is after fun
 	ga.gamejoltUsername;
 	ga.gamejoltUserToken;
 	
+	// Multiplayer
+	ga.isMultiplayer = false;
+	ga.multiplayerNick = false;
+	ga.maxNumberOfChatMessages = 10;
+	ga.chatMessages = [];
+	ga.newChatMessages = [];
+	ga.onlinePlayers = []; // Player names
+	ga.gotNewInfo = true;
+	ga.maxNumberOfShownPlayers = 10;
+	ga.multiplayerPotatoSprites = []; // All other potatoes
+	
 	// Levels
 	l.levels = getLevels(r.resourceArray); // Gets all levels, in order (the order they are loaded, in r.resourceConstructors)
 	l.currentLevelIndex = 0;
@@ -214,7 +231,7 @@ function definitions() // Has access to other functions, since this is after fun
 	// Constants
 	c.gameName = "Potato";
 	c.gameVersion = "0.2";
-	c.numberOfLayers = 2;
+	c.numberOfLayers = 3;
 	c.defaultCanWidth = 800;
 	c.defaultCanHeight = 600;
 	c.canWidth = c.defaultCanWidth;
@@ -262,6 +279,13 @@ function definitions() // Has access to other functions, since this is after fun
 	c.tChristmasPotato = 13120;
 	c.tWetPotato = 13118;
 	c.tSpacePotato = 13145;
+	
+	c.updateServerDelay = 150;
+	
+	c.potatoShake = "potatoShake";
+	c.clientUpdate = "clientUpdate";
+	c.serverUpdate = "serverUpdate";
+	c.potatoBye = "potatoBye";
 }
 
 function main()
@@ -303,6 +327,7 @@ function main()
 	
 	setupElements(document.body);
 	createMenuButtons();
+	setupSocketEvents();
 	
 	loadResources(r.resourceArray); // Starts loading resources
 	
@@ -341,8 +366,9 @@ function setupElements(parent)
 	mainCanvas = canvases[0];
 	mainCanvasContext = canvasContexts[0];
 	
-	fg = canvasContexts[0];
-	bg = canvasContexts[1];
+	ui = canvasContexts[0];
+	fg = canvasContexts[1];
+	bg = canvasContexts[2];
 	
 	addEventListeners(); // In input.js
 }
@@ -358,7 +384,10 @@ function update()
 	
 	if(m.newLocation)
 	{
-		clearAllLayers();
+		if(menuLoc!="play")
+		{
+			clearAllLayers();
+		}
 	}
 	
 	if(menuLoc=="loading")
@@ -373,6 +402,9 @@ function update()
 		}
 		
 		displayMainMenu(fg);
+	} else if(menuLoc=="gameSelection")
+	{
+		displayGameSelection(fg);
 	} else if(menuLoc=="play")
 	{
 		displayGame(); // In game.js
@@ -401,7 +433,7 @@ function getPlayerInfo()
 {
 	var errorText = "You will not be able to receive trophies or save scores. Reload the page if you change your mind :)";
 	
-	ga.gamejoltUsername = prompt("To receive trophies and upload high scores, please enter your username: ", "Username");
+	ga.gamejoltUsername = prompt("To receive trophies and upload high scores, please enter your username (this will also be used for multiplayer): ", "Username");
 	
 	if(ga.gamejoltUsername==null || ga.gamejoltUsername==undefined)
 	{

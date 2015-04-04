@@ -17,7 +17,7 @@
 function createMenuButtons()
 {
 	// Main Menu
-	addMenuButton("Play", 200, m.mainMenuButtons, "normal", {defaultValue: "play"});
+	addMenuButton("Play", 200, m.mainMenuButtons, "normal", {defaultValue: "gameSelection"});
 	addMenuButton("Options", 250, m.mainMenuButtons, "normal", {defaultValue: "options"});
 	addMenuButton("Credits", 300, m.mainMenuButtons, "normal", {defaultValue: "credits"});
 	
@@ -29,17 +29,45 @@ function createMenuButtons()
 	// Credits
 	addMenuButton("Back", 550, m.creditsButtons, "normal", {defaultValue: "main"});
 	
+	// Game selection
+	addMenuButton("Singleplayer Arcade", 200, m.gameSelectionButtons, "callback", {defaultValue: function()
+	{
+		changeMenuLocation("play");
+		ga.isMultiplayer = false;
+	}});
+	
+	// Game selection
+	addMenuButton("Multiplayer Madness", 250, m.gameSelectionButtons, "callback", {defaultValue: function()
+	{
+		// Setting up socket again is 100% fine
+		if(!setupSocket()) // Failed
+		{
+			changeMenuLocation("main");
+		} else
+		{
+			changeMenuLocation("play");
+			ga.isMultiplayer = true;
+		}
+	}});
+	
 	// Others
 	addMenuButton("Yes", 250, m.confirmFullScreenButtons, "dummy"); // Hack in click handler
 	addMenuButton("No", 300, m.confirmFullScreenButtons, "callback", {defaultValue: cancelFullScreenConfirmation});
 	
 	addMenuButton("Restart level", 350, m.gameOverButtons, "normal", {defaultValue: "play"});
-	addMenuButton("Return to main menu", 400, m.gameOverButtons, "normal", {defaultValue: "main"});
+	addMenuButton("Return to main menu", 400, m.gameOverButtons, "callback", {defaultValue: resetGame});
 	
 	addMenuButton("Return to main menu", 350, m.gameWonButtons, "callback", {defaultValue: resetGame});
 	
 	addMenuButton("Next level", 350, m.levelFinishedButtons, "normal", {defaultValue: "play"});
-	addMenuButton("Return to main menu", 400, m.levelFinishedButtons, "normal", {defaultValue: "main"});
+	addMenuButton("Return to main menu", 400, m.levelFinishedButtons, "callback", {defaultValue: resetGame});
+	
+	addMenuButton("Respawn", 250, m.respawnButtons, "callback", {defaultValue: function()
+	{
+		changeMenuLocation("play");
+		respawn();
+	}});
+	addMenuButton("Return to main menu", 300, m.respawnButtons, "callback", {defaultValue: resetGame});
 }
 
 function updateMenuInfo()
@@ -220,6 +248,23 @@ function displayMainMenu(layer)
 	handleMenuButtons(layer, m.mainMenuButtons); // Always put this after drawing the menu page
 }
 
+function displayGameSelection(layer)
+{
+	layer.clearLayer();
+	
+	layer.fillStyle = c.mainMenuBackgroundColor;
+	layer.fillLayer();
+	
+	layer.font = c.bigTextFont;
+	layer.fillStyle = c.mainMenuColor;
+	layer.drawCenteredString("Game Selection", c.hCanWidth, 100);
+	
+	layer.font = c.mainTextFont;
+	layer.drawString(c.gameVersion, 550);
+	
+	handleMenuButtons(layer, m.gameSelectionButtons);
+}
+
 function displayOptions(layer)
 {
 	layer.clearLayer();
@@ -308,18 +353,32 @@ function displayConfirmFullScreen(layer)
 
 function displayGameOver(layer)
 {
-	var score = ga.score + ga.currentLevelScore; // Fake score, what the player would of gotten
+	if(!ga.isMultiplayer)
+	{
+		var score = ga.score + ga.currentLevelScore; // Fake score, what the player would of gotten
+		
+		layer.clearLayer();
+		
+		layer.fillStyle = c.mainMenuBackgroundColor;
+		layer.fillLayer();
+		
+		layer.fillStyle = c.mainMenuColor;
+		layer.drawCenteredString("GAME OVER", c.hCanWidth, 200);
+		layer.drawCenteredString("SCORE: " + score, c.hCanWidth, 250);
 	
-	layer.clearLayer();
-	
-	layer.fillStyle = c.mainMenuBackgroundColor;
-	layer.fillLayer();
-	
-	layer.fillStyle = c.mainMenuColor;
-	layer.drawCenteredString("GAME OVER", c.hCanWidth, 200);
-	layer.drawCenteredString("SCORE: " + score, c.hCanWidth, 250);
-	
-	handleMenuButtons(layer, m.gameOverButtons);
+		handleMenuButtons(layer, m.gameOverButtons);
+	} else
+	{
+		layer.clearLayer();
+		
+		layer.fillStyle = c.mainMenuBackgroundColor;
+		layer.fillLayer();
+		
+		layer.fillStyle = c.mainMenuColor;
+		layer.drawCenteredString("YOU DIED!", c.hCanWidth, 200);
+		
+		handleMenuButtons(layer, m.respawnButtons);
+	}
 }
 
 function displayGameWon(layer)
@@ -338,16 +397,30 @@ function displayGameWon(layer)
 
 function displayLevelFinished(layer)
 {
-	layer.clearLayer();
-	
-	layer.fillStyle = c.mainMenuBackgroundColor;
-	layer.fillLayer();
-	
-	layer.fillStyle = c.mainMenuColor;
-	layer.drawCenteredString("LEVEL FINISHED!", c.hCanWidth, 200);
-	layer.drawCenteredString("SCORE: " + ga.score, c.hCanWidth, 250); // Now real score
-	
-	handleMenuButtons(layer, m.levelFinishedButtons);
+	if(!ga.isMultiplayer)
+	{
+		layer.clearLayer();
+		
+		layer.fillStyle = c.mainMenuBackgroundColor;
+		layer.fillLayer();
+		
+		layer.fillStyle = c.mainMenuColor;
+		layer.drawCenteredString("LEVEL FINISHED!", c.hCanWidth, 200);
+		layer.drawCenteredString("SCORE: " + ga.score, c.hCanWidth, 250); // Now real score
+		
+		handleMenuButtons(layer, m.levelFinishedButtons);
+	} else
+	{
+		layer.clearLayer();
+		
+		layer.fillStyle = c.mainMenuBackgroundColor;
+		layer.fillLayer();
+		
+		layer.fillStyle = c.mainMenuColor;
+		layer.drawCenteredString("YOU MADE IT", c.hCanWidth, 200);
+		
+		handleMenuButtons(layer, m.respawnButtons);
+	}
 }
 
 function saveOptions() // Why does the screen flash when this runs?

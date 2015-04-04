@@ -29,17 +29,6 @@ function drawBasicBackground(layer)
 	}
 }
 
-function drawSprites(layer)
-{
-	var currentSprite;
-	
-	for(var i=0, length=l.currentLevel.sprites.length; i<length; i++)
-	{
-		currentSprite = l.currentLevel.sprites[i];
-		drawSprite(layer, currentSprite);
-	}
-}
-
 function drawSprite(layer, sprite)
 {
 	layer.drawImage(sprite.animation.getFrame(), sprite.x, sprite.y);
@@ -48,6 +37,26 @@ function drawSprite(layer, sprite)
 function drawPotato(layer)
 {
 	drawSprite(layer, ga.potato);
+}
+
+function drawMultiplayerPotatos(layer)
+{
+	var currentPotato;
+	
+	layer.fillStyle = "white";
+	
+	for(var i=0, length=ga.multiplayerPotatoSprites.length; i<length; i++)
+	{
+		currentPotato = ga.multiplayerPotatoSprites[i];
+		currentPotato.y += ga.scrollingSpeed
+		
+		if(spriteIsVisible(currentPotato))
+		{
+			drawSprite(layer, currentPotato);
+		}
+		
+		layer.drawCenteredString(currentPotato.nick, currentPotato.x + (currentPotato.boxWidth/2), currentPotato.y);
+	}
 }
 
 function floorTileIsVisible(floorTileY) // Takes y coord

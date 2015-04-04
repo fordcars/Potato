@@ -66,12 +66,21 @@ function keyDownEventHandler(event)
 {
 	var e = event || window.event;
 	var keyCode = e.keyCode || e.key;
+	var key;
 	
 	for(var i=0; i<c.numberOfInputKeys; i++)
 	{
-		if(inp.keys[i].keyCode==keyCode)
+		key = inp.keys[i];
+		
+		if(key.keyCode==keyCode)
 		{
-			inp.keys[i].s = true;
+			if(key.isEvent)
+			{
+				key.callback();
+			} else
+			{
+				inp.keys[i].s = true;
+			}
 		}
 	}
 	
@@ -96,12 +105,25 @@ function keyUpEventHandler(event)
 	return false;
 }
 
-function newInputKey(keyCode)
+function newInputKey(keyCode, isEvent, callback)
 {
 	var tempObj = {};
 	
+	if(isEvent==undefined)
+	{
+		isEvent = false;
+	}
+	
 	tempObj.keyCode = keyCode;
-	tempObj.s = false; // State
+	tempObj.isEvent = isEvent;
+	
+	if(isEvent)
+	{
+		tempObj.callback = callback;
+	} else
+	{
+		tempObj.s = false; // State
+	}
 	
 	inp.keys.push(tempObj);
 	

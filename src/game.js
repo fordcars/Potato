@@ -49,16 +49,20 @@ function setupGame()
 	ga.foregroundObjects = createLevelObjects(false);
 	ga.floorTiles = createNewFloorTiles(getAnimationFromName(l.currentLevel.floorTileStyle), l.currentLevel.amountOfLines);
 	
-	potatoX = ga.floorTiles[1].x + (ga.floorTileSide / 2);
+	potatoX = ga.floorTiles[1].x + (ga.floorTileSide / 2); // Second tile is the default one
 	
 	ga.potato = createSprite(getAnimationFromName("potato"), potatoX, c.hCanHeight); // Create potato
 	
 	ga.uiLocation = "game";
+	drawUi(ui, true);
 }
 
 function resetGame()
 {
+	ga.firstFrame = true;
 	ga.score = 0;
+	l.currentLevelIndex = 0;
+	byeSocket();
 	
 	changeMenuLocation("main");
 }
@@ -212,13 +216,28 @@ function createFloorTile(animation, slot, line)
 	return createSprite(animation, floorTileX, floorTileY);
 }
 
+function respawn()
+{
+	ga.currentScrollingY = ga.defaultScrollingY;
+	ga.scrollingSpeed = ga.defaultScrollingSpeed;
+	ga.potatoSpeed = ga.defaultPotatoSpeed;
+	ga.potato.x = ga.floorTiles[1].x + (ga.floorTileSide / 2); // Reset
+	
+	clearAllLayers();
+	drawBasicBackground(bg);
+}
+
 // Game events
 function gameOver()
 {
-	ga.firstFrame = true;
-	l.currentLevelIndex--;
+	if(!ga.isMultiplayer)
+	{
+		ga.firstFrame = true;
+		l.currentLevelIndex--;
+		
+		addScore(ga.score + ga.currentLevelScore); // Uploads 'fake' score, the score you would of had
+	}
 	
-	addScore(ga.score + ga.currentLevelScore); // Uploads 'fake' score, the score you would of had
 	changeMenuLocation("gameOver"); // Shows 'fake' score
 }
 
@@ -231,17 +250,23 @@ function gameWon()
 
 function levelFinished()
 {
-	var realCurrentLevelIndex = l.currentLevelIndex - 1; // The make it more logical at this stage
-	getTrophy(realCurrentLevelIndex);
-	
-	ga.score += ga.currentLevelScore; // Add to total score
-	addScore(ga.score); // Upload real score
-	
-	ga.firstFrame = true; // Tells the game to setup next time, to get the next level
-	
-	if(l.currentLevel.isLastLevel)
+	if(!ga.isMultiplayer)
 	{
-		gameWon();
+		var realCurrentLevelIndex = l.currentLevelIndex - 1; // The make it more logical at this stage
+		getTrophy(realCurrentLevelIndex);
+		
+		ga.score += ga.currentLevelScore; // Add to total score
+		addScore(ga.score); // Upload real score
+		
+		ga.firstFrame = true; // Tells the game to setup next time, to get the next level
+		
+		if(l.currentLevel.isLastLevel)
+		{
+			gameWon();
+		} else
+		{
+			changeMenuLocation("levelFinished");
+		}
 	} else
 	{
 		changeMenuLocation("levelFinished");
@@ -284,6 +309,32 @@ function doPotatoControls()
 	{
 		ga.potato.x += ga.potatoSpeed;
 	}
+	
+	if(ga.isMultiplayer)
+	{
+		var speedRate = 0.1;
+		var minPotatoSpeed = 3;
+		
+		if(inp.up.s)
+		{
+			ga.scrollingSpeed += speedRate;
+			ga.potatoSpeed = ga.scrollingSpeed;
+			
+			if(ga.potatoSpeed<minPotatoSpeed)
+			{
+				ga.potatoSpeed = minPotatoSpeed; // Is this useful?
+			}
+		} else if(inp.down.s)
+		{
+			ga.scrollingSpeed -= speedRate;
+			ga.potatoSpeed = ga.scrollingSpeed;
+			
+			if(ga.potatoSpeed<minPotatoSpeed)
+			{
+				ga.potatoSpeed = minPotatoSpeed; // Is this useful?
+			}
+		}
+	}
 }
 
 function spriteIsOnFloorTile(floorTileX, floorTileY, sprite)
@@ -303,12 +354,14 @@ function spriteIsOnFloorTile(floorTileX, floorTileY, sprite)
 
 function doMath()
 {
-	ga.scrollingSpeed += ga.speedAugmentation;
-	ga.potatoSpeed += ga.speedAugmentation;
+	if(!ga.isMultiplayer)
+	{
+		ga.scrollingSpeed += ga.speedAugmentation;
+		ga.potatoSpeed += ga.speedAugmentation;
+		ga.currentLevelScore++;
+	}
 	
-	ga.potato.animation.delay -= ga.potatoAnimationAugmentation;
-	
-	ga.currentLevelScore++;
+	ga.potato.animation.delay = 10 - positive(ga.scrollingSpeed);
 }
 
 function mainGameLoop()
@@ -322,6 +375,17 @@ function mainGameLoop()
 	
 	drawBackgroundObjects(fg); // Also does movement for optimization
 	drawFloorTiles(fg); // Also does potato collision detection for optimization
+	
+	if(ga.isMultiplayer)
+	{
+		drawMultiplayerPotatos(fg);
+	}
+	
 	drawPotato(fg);
 	drawForegroundObjects(fg); // Also does movement for optimization
+	
+	if(ga.isMultiplayer)
+	{
+		drawUi(ui);
+	}
 }
