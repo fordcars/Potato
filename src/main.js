@@ -223,6 +223,8 @@ function definitions() // Has access to other functions, since this is after fun
 	ga.maxNumberOfShownPlayers = 10;
 	ga.multiplayerPotatoSprites = []; // All other potatoes
 	
+	ga.randomNames = ["Lolnoname", "Noname", "Nameplease?", "Ineedaname"];
+	
 	// Levels
 	l.levels = getLevels(r.resourceArray); // Gets all levels, in order (the order they are loaded, in r.resourceConstructors)
 	l.currentLevelIndex = 0;
@@ -433,7 +435,7 @@ function getPlayerInfo()
 {
 	var errorText = "You will not be able to receive trophies or save scores. Reload the page if you change your mind :)";
 	
-	ga.gamejoltUsername = prompt("To receive trophies and upload high scores, please enter your username (this will also be used for multiplayer): ", "Username");
+	ga.gamejoltUsername = prompt("To receive trophies and upload high scores, please enter your username (this will also be used for multiplayer): ", getRandomName());
 	
 	if(ga.gamejoltUsername==null || ga.gamejoltUsername==undefined)
 	{

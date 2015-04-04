@@ -21,14 +21,14 @@ function setupSocket()
 	
 	if(!ga.multiplayerNick)
 	{
-		if(ga.gamejoltUsername!=null)
+		if(ga.gamejoltUsername!=null && ga.gamejoltUserToken!=null)
 		{
 			ga.multiplayerNick = ga.gamejoltUsername;
 			playerRegistered = true;
 			valid = true;
 		} else
 		{
-			var newNick = prompt("Please enter your nick: ", "NoName");
+			var newNick = prompt("Please enter your nick: ", getRandomName());
 				
 			if(newNick==null || newNick==undefined)
 			{
@@ -149,6 +149,13 @@ function doPotatoes(potatoes)
 			ga.multiplayerPotatoSprites[ga.multiplayerPotatoSprites.length] = potatoSprite;
 		}
 	}
+}
+
+function getRandomName()
+{
+	var randomIndex = randomInt(-1, ga.randomNames.length);
+	
+	return ga.randomNames[randomIndex];
 }
 
 function chat()
