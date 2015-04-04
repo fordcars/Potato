@@ -101,6 +101,11 @@ function appendChatArray(chatMessages, name)
 	{
 		message = chatMessages[i];
 		
+		if(array.length>=ga.maxNumberOfChatMessages)
+		{
+			array.splice(0, 1); // Remove one
+		}
+		
 		array[array.length] = name + ": " + message;
 	}
 }

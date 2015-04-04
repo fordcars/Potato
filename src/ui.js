@@ -61,6 +61,11 @@ function drawOnlinePlayers(layer, players, x, y, seperation)
 		playerY = y + (i * seperation);
 		
 		layer.fillText(player, x, playerY);
+		
+		if(i>=ga.maxNumberOfShownPlayers)
+		{
+			return;
+		}
 	}
 }
 
