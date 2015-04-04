@@ -160,10 +160,13 @@ function getRandomName()
 
 function chat()
 {
-	var chatMessage = prompt("Chat:", "");
-	
-	if(chatMessage!=undefined && chatMessage!=null)
+	if(ga.isMultiplayer)
 	{
-		ga.newChatMessages[ga.newChatMessages.length] = chatMessage;
+		var chatMessage = prompt("Chat:", "");
+		
+		if(chatMessage!=undefined && chatMessage!=null)
+		{
+			ga.newChatMessages[ga.newChatMessages.length] = chatMessage;
+		}
 	}
 }

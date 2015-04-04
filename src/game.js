@@ -54,7 +54,11 @@ function setupGame()
 	ga.potato = createSprite(getAnimationFromName("potato"), potatoX, c.hCanHeight); // Create potato
 	
 	ga.uiLocation = "game";
-	drawUi(ui, true);
+	
+	if(ga.isMultiplayer)
+	{
+		drawUi(ui, true);
+	}
 }
 
 function resetGame()
