@@ -232,7 +232,7 @@ function definitions() // Has access to other functions, since this is after fun
 	
 	// Constants
 	c.gameName = "Potato";
-	c.gameVersion = "0.3";
+	c.gameVersion = "0.4";
 	c.numberOfLayers = 3;
 	c.defaultCanWidth = 800;
 	c.defaultCanHeight = 600;
