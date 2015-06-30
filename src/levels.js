@@ -66,6 +66,7 @@ function loadNextPotatoLevel() // Levels defined here
 	{
 		case 0:
 			level.name = "Potato Clouds";
+			level.amountOfLines = 100;
 			level.backgroundColor = "rgb(100, 100, 255)";
 			level.floorTileStyle = "grass";
 			

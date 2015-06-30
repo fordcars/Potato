@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-function drawUi(layer, forceDraw)
+function drawMultiplayerUi(layer, forceDraw)
 {
 	if(ga.gotNewInfo || forceDraw)
 	{
@@ -69,7 +69,7 @@ function drawOnlinePlayers(layer, players, x, y, seperation)
 	}
 }
 
-function drawChat(layer, x, y, heigth, seperation)
+function drawChat(layer, x, y, height, seperation)
 {
 	var message
 	var messageY;
@@ -79,7 +79,7 @@ function drawChat(layer, x, y, heigth, seperation)
 	{
 		message = ga.chatMessages[i];
 		messageNumber++;
-		messageY = y + heigth - (messageNumber * seperation);
+		messageY = y + height - (messageNumber * seperation);
 		
 		layer.fillText(message, x, messageY);
 	}

@@ -228,3 +228,43 @@ function httpGet(url)
 	
     return xmlHttp.responseText;
 }
+
+function logTileArray() // Generates tile array out of current tiles and console.logs() it, useful for multiplayer maps
+{
+	var array = []; // Array 
+	
+	var currentTile;
+	var lastY = false;
+	
+	for(var i=ga.floorTiles.length-1; i>=0; i--) // Inverted because they are, see createFloorTile()
+	{
+		currentTile = ga.floorTiles[i];
+		
+		if(lastY!==currentTile.y) // Don't add it if it is on the same line as the last one, see buildFloorTilesFromArray(), it adds it automatically
+		{
+			array.push((currentTile.x - ga.slotsXOffset) / ga.floorTileSide); // Add it
+		}
+		
+		lastY = currentTile.y;
+	}
+	
+	console.log(numberArrayToString(array)); // Make sure it looks good in console
+}
+
+function numberArrayToString(array)
+{
+	var string = "[";
+	
+	for(var i=0, length=array.length; i<length; i++)
+	{
+		if(i==0)
+		{
+			string += array[i];
+		} else
+		{
+			string += ", " + array[i];
+		}
+	}
+	
+	return string + "]";
+}

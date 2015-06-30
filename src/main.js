@@ -33,7 +33,7 @@ var canvasContexts = [];
 var mainCanvas;
 var mainCanvasContext;
 
-var socketIo = io("http://potato.biz.tm:3000");
+var socketIo = io("http://potato.biz.tm:2450");
 
 // "Namespaces"
 var gr = {}; // Graphics. Game and graphics both start with g
@@ -288,6 +288,14 @@ function definitions() // Has access to other functions, since this is after fun
 	c.clientUpdate = "clientUpdate";
 	c.serverUpdate = "serverUpdate";
 	c.potatoBye = "potatoBye";
+	
+	c.multiplayerLevel = [2, 2, 2, 2, 3, 3, 2, 3, 2, 3, 2, 2, 1, 0, 1, 0,
+	1, 1, 1, 0, 0, 1, 2, 1, 1, 1, 1, 0, 1, 0, 1, 2, 3, 2, 2, 3, 3, 2, 3,
+	2, 3, 2, 3, 3, 3, 2, 2, 2, 3, 2, 1, 1, 0, 0, 1, 2, 2, 1, 0, 0, 1, 1,
+	1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 2, 3, 3, 3,
+	3, 3, 3, 2, 3, 2, 2, 2, 3, 2, 3, 2, 3, 2, 2, 2, 3, 2, 1, 1, 1, 1, 0,
+	0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1,
+	0, 1, 0, 0, 0, 1, 2, 2, 2, 2, 2, 1, 1, 0, 1, 2, 1, 0, 0]; // Tile slots, can be 0, 1, 2 or 3
 }
 
 function main()

@@ -16,7 +16,7 @@
 
 var c = {}; // Constants
 
-c.serverPort = 3000;
+c.serverPort = 2450;
 c.maxNumberOfPlayers = 40;
 c.updateClientsDelay = 150;
 

@@ -94,6 +94,12 @@ function drawBackgroundObjects(layer)
 		if(spriteIsVisible(currentBackgroundObject))
 		{
 			layer.drawImage(currentBackgroundObject.animation.getFrame(), currentBackgroundObject.x, currentBackgroundObject.y);
+		} else
+		{
+			if(currentBackgroundObject.y>c.canHeight)
+			{
+				currentBackgroundObject.y = -l.currentLevel.length;
+			}
 		}
 	}
 }
@@ -110,6 +116,12 @@ function drawForegroundObjects(layer)
 		if(spriteIsVisible(currentForegroundObject))
 		{
 			layer.drawImage(currentForegroundObject.animation.getFrame(), currentForegroundObject.x, currentForegroundObject.y);
+		} else
+		{
+			if(currentForegroundObject.y>c.canHeight)
+			{
+				currentForegroundObject.y = -l.currentLevel.length;
+			}
 		}
 	}
 }

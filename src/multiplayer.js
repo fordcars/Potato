@@ -14,28 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-function setupSocket()
+function setupSocket() // Call this as many times as you want
 {
 	var valid = false;
 	var playerRegistered = false;
+	var nick;
 	
 	if(!ga.multiplayerNick)
 	{
 		if(ga.gamejoltUsername!=null && ga.gamejoltUserToken!=null)
 		{
-			ga.multiplayerNick = ga.gamejoltUsername;
+			nick = ga.gamejoltUsername;
 			playerRegistered = true;
 			valid = true;
 		} else
 		{
-			var newNick = prompt("Please enter your nick: ", getRandomName());
+			nick = prompt("Please enter your nick: ", getRandomName());
 				
-			if(newNick==null || newNick==undefined)
+			if(nick==null || nick==undefined)
 			{
 				valid = false;
 			} else
 			{
-				ga.multiplayerNick = newNick;
 				valid = true;
 				playerRegistered = false;
 			}
@@ -47,10 +47,22 @@ function setupSocket()
 	
 	if(valid)
 	{
-		socketIo.emit(c.potatoShake, {nick: ga.multiplayerNick, registered: playerRegistered});
-		window.setInterval(updateServer, c.updateServerDelay);
-		return true;
+		var availableNick = nickAvailable(nick); // availableNick might be different from nick
+		
+		if(availableNick!==false) // User did not cancel
+		{
+			ga.multiplayerNick = availableNick;
+			
+			socketIo.emit(c.potatoShake, {nick: ga.multiplayerNick, registered: playerRegistered});
+			window.setInterval(updateServer, c.updateServerDelay);
+			return true;
+		} else
+		{
+			return false;
+		}
 	}
+	
+	return false;
 }
 
 function byeSocket() // Send message to server that we left
@@ -65,6 +77,35 @@ function setupSocketEvents()
 		doPotatoes(data); // data is an array of potatoes
 		updateInfo(data);
 	});
+}
+
+function nickAvailable(nick) // Checks if nick is not already used online, returns an available nick, or false if the user cancelled
+{
+	for(var i=0, length=ga.onlinePlayers.length; i<length; i++)
+	{
+		if(ga.onlinePlayers[i]===nick) // Nick already chosen!
+		{
+			var newNick = prompt("Nick already chosen! Pleas choose another one: ", getRandomName());
+				
+			if(newNick==null || newNick==undefined) // Nothing entered/pressed cancel
+			{
+				return false;
+			} else // Valid input
+			{
+				var newAvailableNick = nickAvailable(newNick); // Recursion! Is new nick available?
+				
+				if(newAvailableNick===false) // Cancelled!
+				{
+					return false;
+				} else
+				{
+					return newAvailableNick;
+				}
+			}
+		}
+	}
+	
+	return nick; // All good! Nick not already used
 }
 
 function updateInfo(data) // Optimization? I think not!

@@ -30,35 +30,44 @@ function displayGame()
 	}
 }
 
+function initValues() // Useful initializations
+{
+	ga.currentScrollingY = ga.defaultScrollingY;
+	ga.scrollingSpeed = ga.defaultScrollingSpeed;
+	ga.potatoSpeed = ga.defaultPotatoSpeed;
+	ga.currentLevelScore = 0;
+}
+
 function setupGame()
 {
 	var potatoX;
 	
-	ga.potatoSpeed = ga.defaultPotatoSpeed;
-	ga.scrollingSpeed = ga.defaultScrollingSpeed;
-	ga.currentScrollingY = ga.defaultScrollingY;
-	ga.currentLevelScore = 0;
+	initValues();
 	
 	l.currentLevel = loadNextPotatoLevel();
 	
 	clearAllLayers();
-	
 	drawBasicBackground(bg);
+	
+	if(ga.isMultiplayer)
+	{
+		// Use pre-generated level
+		ga.floorTiles = buildFloorTilesFromArray(getAnimationFromName(l.currentLevel.floorTileStyle), c.multiplayerLevel);
+		drawMultiplayerUi(ui, true); // Draw multiplayer ui
+	} else // Not multiplayer
+	{
+		// Generate random level
+		ga.floorTiles = createNewFloorTiles(getAnimationFromName(l.currentLevel.floorTileStyle), l.currentLevel.amountOfLines);
+	}
 	
 	ga.backgroundObjects = createLevelObjects(true); // True for background
 	ga.foregroundObjects = createLevelObjects(false);
-	ga.floorTiles = createNewFloorTiles(getAnimationFromName(l.currentLevel.floorTileStyle), l.currentLevel.amountOfLines);
 	
-	potatoX = ga.floorTiles[1].x + (ga.floorTileSide / 2); // Second tile is the default one
+	potatoX = ga.floorTiles[0].x + (ga.floorTileSide / 2); // Puts potato on first tile
 	
 	ga.potato = createSprite(getAnimationFromName("potato"), potatoX, c.hCanHeight); // Create potato
 	
 	ga.uiLocation = "game";
-	
-	if(ga.isMultiplayer)
-	{
-		drawUi(ui, true);
-	}
 }
 
 function resetGame()
@@ -160,7 +169,7 @@ function createNewFloorTiles(animation, numberOfTileLines)
 	
 	var finishFloorTile;
 	
-	for(var i=0; i>=-numberOfTileLines; i--)
+	for(var i=0; i>-numberOfTileLines; i--) // Inverted, since i needs to be <=0
 	{
 		if(i==-numberOfTileLines) // Last line
 		{
@@ -211,8 +220,43 @@ function createNewFloorTiles(animation, numberOfTileLines)
 	return floorTiles;
 }
 
+function buildFloorTilesFromArray(animation, tileArray) // Generates floor tiles from array of floor tile slots
+{
+	var floorTiles = [];
+	var numberOfTiles = tileArray.length;
+	var currentTileSlot;
+	
+	var lastSlot = false; // Make sure we don't have diagonal paths
+	
+	for(var i=0; i<numberOfTiles; i++)
+	{
+		currentTileSlot = tileArray[i];
+		
+		if(i===numberOfTiles-1)
+		{
+			var finishTileAnimation = getAnimationFromName(ga.finishFloorTileAnimationName);
+			
+			var tile = createFloorTile(finishTileAnimation, currentTileSlot, -i)
+			tile.isFinish = true;
+			
+			floorTiles.push(tile); // Push it too!
+		} else
+		{
+			floorTiles.push(createFloorTile(animation, currentTileSlot, -i)); // -i, because createFloorTile takes an i<=0
+		}
+		
+		if(lastSlot!==currentTileSlot && i!==0) // This isn't the first tile either
+		{
+			floorTiles.push(createFloorTile(animation, lastSlot, -i)); // Add another tile over the tile on the last line.
+		}
+		
+		lastSlot = currentTileSlot;
+	}
+	
+	return floorTiles;
+}
 
-function createFloorTile(animation, slot, line)
+function createFloorTile(animation, slot, line) // Line is the bottom-most line (tiles move, not the potato). Lines are then negative (upwards is negative)
 {
 	var floorTileX = (slot * ga.floorTileSide) + ga.slotsXOffset;
 	var floorTileY = line * ga.floorTileSide;
@@ -222,13 +266,16 @@ function createFloorTile(animation, slot, line)
 
 function respawn()
 {
-	ga.currentScrollingY = ga.defaultScrollingY;
-	ga.scrollingSpeed = ga.defaultScrollingSpeed;
-	ga.potatoSpeed = ga.defaultPotatoSpeed;
-	ga.potato.x = ga.floorTiles[1].x + (ga.floorTileSide / 2); // Reset
+	initValues();
+	ga.potato.x = ga.floorTiles[0].x + (ga.floorTileSide / 2); // Reset
+	
+	// Keep objects fresh
+	ga.backgroundObjects = createLevelObjects(true);
+	ga.foregroundObjects = createLevelObjects(false);
 	
 	clearAllLayers();
 	drawBasicBackground(bg);
+	drawMultiplayerUi(ui, true);
 }
 
 // Game events
@@ -385,11 +432,11 @@ function mainGameLoop()
 		drawMultiplayerPotatos(fg);
 	}
 	
-	drawPotato(fg);
+	drawPotato(fg); // Draw over multiplayer potatoes for clarity
 	drawForegroundObjects(fg); // Also does movement for optimization
 	
 	if(ga.isMultiplayer)
 	{
-		drawUi(ui);
+		drawMultiplayerUi(ui);
 	}
 }
