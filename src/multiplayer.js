@@ -40,8 +40,10 @@ function setupSocket() // Call this as many times as you want
 				playerRegistered = false;
 			}
 		}
-	} else
+	} else // Nick already defined
 	{
+		nick = ga.multiplayerNick; // For verifications
+		ga.multiplayerNick = false; // If the nick is bad, won't mess up
 		valid = true;
 	}
 	
