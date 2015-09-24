@@ -55,7 +55,7 @@ function setupGame()
 		ga.floorTiles = buildFloorTilesFromArray(getAnimationFromName(l.currentLevel.floorTileStyle), c.multiplayerLevel);
 		drawMultiplayerUi(ui, true); // Draw multiplayer ui
 	} else // Not multiplayer
-	{
+	{console.log("Hi");
 		// Generate random level
 		ga.floorTiles = createNewFloorTiles(getAnimationFromName(l.currentLevel.floorTileStyle), l.currentLevel.amountOfLines);
 	}
@@ -171,7 +171,7 @@ function createNewFloorTiles(animation, numberOfTileLines)
 	
 	for(var i=0; i>-numberOfTileLines; i--) // Inverted, since i needs to be <=0
 	{
-		if(i==-numberOfTileLines) // Last line
+		if(i==-(numberOfTileLines - 1)) // Last line
 		{
 			currentSlot = lastSlot;
 			finishFloorTile = createFloorTile(getAnimationFromName(ga.finishFloorTileAnimationName), currentSlot, i);
@@ -232,7 +232,7 @@ function buildFloorTilesFromArray(animation, tileArray) // Generates floor tiles
 	{
 		currentTileSlot = tileArray[i];
 		
-		if(i===numberOfTiles-1)
+		if(i===numberOfTiles-1) // Last tile
 		{
 			var finishTileAnimation = getAnimationFromName(ga.finishFloorTileAnimationName);
 			
